@@ -1,0 +1,149 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#define SZ 10
+
+#include <locale.h>
+
+void wotuhprint(char wotuh[SZ][SZ]){
+  printf("\n");
+  for(int i = 0; i < SZ; i++) {
+    for (int j = 0; j < SZ; j++) {
+      printf("%c ", wotuh[i][j]);
+    }
+    printf("\n");
+  }
+  printf("\n");
+}
+
+void scanxy(int *x, int *y){
+  printf("Введите координаты:\nx - ");
+  scanf("%d", x); 
+  printf("y - ");
+  scanf("%d", y);
+}
+
+int checkvin(char wotuh[SZ][SZ]){
+  for(int i = 0; i < SZ; i++) {
+    for (int j = 0; j < SZ; j++) {
+      if (wotuh[i][j] == '*') {
+        return 0; 
+      }
+    }
+  }
+  return 1;
+}
+
+int main() {
+  setlocale(LC_ALL, "Rus");
+
+  char wotuh1[SZ][SZ];
+  char wotuh2[SZ][SZ];
+  char wotuh1hide[SZ][SZ];
+  char wotuh2hide[SZ][SZ];
+  char playa1[25], playa2[25];
+
+
+    printf("Имя первого игрока: ");
+    fgets(playa1, sizeof(playa1), stdin);
+    playa1[strcspn(playa1, "\n")] = '\0';
+    printf("\nИмя второго игрока: ");
+    fgets(playa2, sizeof(playa2), stdin);
+    playa2[strcspn(playa2, "\n")] = '\0';
+
+    for (int i = 0; i < SZ; i++) {
+      for (int j = 0; j < SZ; j++) {
+        wotuh1[i][j] = '~';
+        wotuh2[i][j] = '~';
+        wotuh1hide[i][j] = '~';
+        wotuh2hide[i][j] = '~';
+      }
+    }
+
+    int x, y;
+    int playa1time = 1;
+    int finish = 0; 
+
+    printf("\n\n          ПРАВИЛА РАССТАНОВКИ СУДОВ\n\n");
+    printf("На вашем поле необходимо расставить:\n\n");
+    printf("1)четыре однопалубных корабля (на одну клеточку);\n");
+    printf("2)три двухпалубных корабля (на две клеточки);\n");
+    printf("3)два трехпалубных корабля (на три клеточки);\n");
+    printf("4)один четырехпалубный корабль (на 4 клетки).\n");
+    printf("\nЧтобы разместить корабль, необходимо ввести координаты клеток, которые он занимает, а именно  отсчитать кол-во клеток слева направо и сверху вниз и записать эти значения в x и y соответственно\n((1 <= x <= 10) || (1 <= y <= 10)).\n\n");
+    printf("Расставляя судна по полю, помните, что судна никаким образом не должны соприкасаться между собой — ни сторонами, ни уголками - всегда должны присутствовать зазоры минимум в одну клетку\n\n");
+
+    // корабли первого игрока
+    printf ("\n%s, расставьте корабли:\n\n", playa1);
+    for(int l = 0; l < 20; l++) {
+      scanxy(&x, &y);
+      wotuh1[y - 1][x - 1] = '*';
+      wotuhprint(wotuh1);
+    }
+
+    // корабли второго игрока
+    printf ("\n%s, расставьте корабли:\n\n", playa2);
+    for(int l = 0; l < 20; l++) {
+      scanxy(&x, &y);
+      wotuh2[y - 1][x - 1] = '*';
+      wotuhprint(wotuh2);
+    }
+
+    printf("ОБСТРЕЛ ПРОТИВНИКА!!!\n\n");
+
+
+    while (11) {
+
+      if (playa1time) {
+        if (finish) {
+          break; 
+        }
+
+        //расстрел 2го игрока 
+        do{
+          printf("\n%s, ваш ход:\n", playa1);
+          scanxy(&x, &y);
+          switch(wotuh2[y - 1][x - 1]){
+            case '~': wotuh2[y - 1][x - 1] = '.'; wotuh2hide[y - 1][x - 1] = '.' ; printf("мимо"); break;
+
+            case '*': wotuh2[y - 1][x - 1] = 'x'; wotuh2hide[y - 1][x - 1] = 'x'; printf("попал"); break;
+
+            default: printf("error:/");
+          }
+          wotuhprint(wotuh2hide);
+
+          if (checkvin(wotuh2)) {
+            printf("\nПобедил игрок %s", playa1);
+            finish = 1;  break;
+          }
+        } while (wotuh2[y - 1][x - 1] == 'x');
+      } else {
+        if (finish) {
+          break;
+        }
+
+        // расстрел 1го игрока
+        do{
+          printf("\n%s, ваш ход:\n", playa2);
+          scanxy(&x, &y);
+          switch(wotuh1[y - 1][x - 1]){
+            case '~': wotuh1[y - 1][x - 1] = '.'; wotuh1hide[y - 1][x - 1] = '.'; printf("мимо"); break;
+            case '*': wotuh1[y - 1][x - 1] = 'x'; wotuh1hide[y - 1][x - 1] = 'x'; printf("попал"); break;
+            default: printf("error:/");
+          }
+          wotuhprint(wotuh1hide);
+
+
+          if (checkvin(wotuh1)) {
+            printf("\nПобедил игрок %s", playa2);
+            finish = 1; break;
+          }
+        } while (wotuh1[y - 1][x - 1] == 'x');
+      }
+
+      playa1time = !playa1time;
+    }
+
+
+  return 0;
+}
